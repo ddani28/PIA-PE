@@ -95,7 +95,3 @@ void ingresarGrupos(struct Grupos gp[], int i)
 
     printf("Fecha registrada: %s\n", gp[i].fecha);
 }
-		
-	
-}
-
