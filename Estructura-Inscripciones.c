@@ -10,9 +10,10 @@ struct Inscripcion
 };
 
 
-int existeGrupo(struct Grupo* grupos, int total, int grupoBuscado) {
+int existeGrupo(struct Grupo* gp[], int total, int grupoBuscado) {
     for (int i = 0; i < total; i++) {
-        if (grupos[i].numero == grupoBuscado) return 1;
+        if (gp[i].claveGrupo == grupoBuscado)
+			return 1;
     }
     return 0;
 }
