@@ -68,7 +68,7 @@ main()
                 break;
             
             default:
-                printf("Opción no valida.\n");
+                printf("OpciÃ³n no valida.\n");
         }
     } while (opcion != 0);
 }
@@ -109,7 +109,7 @@ void ingresarMaterias(struct Materias mt[])
 				//fgets(nombre, 20, stdin);
 			if (strlen(nombreSinValidar) == 0) 
 			{
-        		printf("El nombre no puede estar vacío. Intente de nuevo.\n");
+        		printf("El nombre no puede estar vacÃ­o. Intente de nuevo.\n");
     		}
 			}while (strlen(nombreSinValidar) == 0);
 			
@@ -122,7 +122,7 @@ void ingresarMaterias(struct Materias mt[])
 				//fgets(descripcion, 30, stdin);
 			if (strlen(descSinValidar) == 0) 
 			{
-        		printf("El nombre no puede estar vacío. Intente de nuevo.\n");
+        		printf("El nombre no puede estar vacÃ­o. Intente de nuevo.\n");
     		}
 			}while (strlen(descSinValidar) == 0);
 			
