@@ -2,24 +2,58 @@
 #include <string.h>
 #include <time.h>
 
+struct Materias 
+{
+	int clave, semestre;
+	char nombre[20], descripcion[20];	
+};
+struct Grupos
+{
+	int claveGrupo, semestre, numEmpleado; 
+	char fecha[20], periodoGrupo[20];
+	struct Materias claveMateria;
+};
 struct Inscripcion 
 {
     int folio, grupo, matricula;
     char fecha[20];
+    struct Grupos grupoIns;
+};
+struct Direccion
+{
+    char calle[50], colonia[50], municipio[50], estado[50];
+    int numero;
+};
+
+struct Fecha
+{
+    int dia, mes, anio;
+};
+
+struct Alumno
+{
+    int matricula, semestre;
+    float promedios[10]; // Máximo 10 promedios
+    char nombre[100], carrera[50], telefono[11], correo[100];
+    struct Fecha nacimiento;
+    struct Direccion direccion;
 };
 
 main()
 {
     struct Inscripcion inscripciones[50];
+    struct Alumno alumnos[50];
+    struct Grupos grupo[50];
     int totalInscripciones = 0;
     int totalGrupos = 3;
     int totalAlumnos = 5;
+    int i;
 
     int cantidad;
-    printf("¿Cuántas inscripciones desea registrar? ");
+    printf("�Cuantas inscripciones desea registrar? ");
     scanf("%d", &cantidad);
 
-    for (int i = 0; i < cantidad && totalInscripciones < 50; i++)
+    for (i = 0; i < cantidad && totalInscripciones < 50; i++)
     {
         printf("\n--- Registro %d ---\n", i + 1);
         registrarInscripcion(&inscripciones[totalInscripciones], totalInscripciones + 1, grupo, totalGrupos, alumnos, totalAlumnos);
@@ -27,7 +61,7 @@ main()
     }
 
     printf("\nInscripciones registradas:\n");
-    for (int i = 0; i < totalInscripciones; i++)
+    for (i = 0; i < totalInscripciones; i++)
     {
         printf("Folio: %d | Grupo: %d | Matrícula: %d | Fecha: %s\n",
                inscripciones[i].folio,
@@ -38,8 +72,9 @@ main()
 }
 
 
-int existeGrupo(struct Grupo* gp[], int total, int grupoBuscado) {
-    for (int i = 0; i < total; i++) {
+int existeGrupo(struct Grupos* gp[], int total, int grupoBuscado) {
+	int i;
+    for (i = 0; i < total; i++) {
         if (gp[i].claveGrupo == grupoBuscado)
 			return 1;
     }
@@ -47,7 +82,8 @@ int existeGrupo(struct Grupo* gp[], int total, int grupoBuscado) {
 }
 
 int existeAlumno(struct Alumno* alumnos, int total, int matriculaBuscada) {
-    for (int i = 0; i < total; i++) {
+    int i;
+	for (i = 0; i < total; i++) {
         if (alumnos[i].matricula == matriculaBuscada) return 1;
     }
     return 0;
@@ -74,7 +110,6 @@ void registrarInscripcion(struct Inscripcion* inscripcion, int folio, struct Gru
             printf("Grupo no encontrado. Intente de nuevo.\n");
         }
     }
-
     while (!matriculaValida) {
         printf("Ingrese matrícula del alumno: ");
         scanf("%d", &inscripcion->matricula);
