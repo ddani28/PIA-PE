@@ -40,7 +40,7 @@ struct Direccion
 struct Alumno
 {
     int matricula, semestre;
-    float promedios[10];
+    float promedio;
     char nombre[100], carrera[50], telefono[11], correo[100];
     struct Fecha nacimiento;
     struct Direccion direccion;
@@ -53,6 +53,8 @@ struct Profesor
     struct Fecha nacimiento;
     struct Direccion direccion;
 };
+
+
 
 
 main()
@@ -151,27 +153,17 @@ char materiasDisponibles[][10] = {
     "ANI106", "MAT201", "FIS202", "COM203", "ACT204"
 };
 
-int esTextoValido(char *texto);
+
 int validarCarrera(char *carrera);
+int esBisiesto(int anio);
 int validarFecha(struct Fecha f);
 int validarCorreo(char *correo);
 int validarTelefono(char *telefono);
 int validarMateria(char *clave);
 
-void capturarFecha(struct Fecha *f);
-void capturarDireccion(struct Direccion *d);
 void agregarAlumno(struct Alumno *a);
 void agregarProfesor(struct Profesor *p);
 
-int esTextoValido(char *texto) {
-    int i;
-	for (i = 0; texto[i]; i++)
-    {
-        if (!isalpha(texto[i]) && texto[i] != ' ')
-            return 0;
-    }
-    return 1;
-}
 
 int validarCarrera(char *carrera) {
     int i;
@@ -183,17 +175,53 @@ int validarCarrera(char *carrera) {
     return 0;
 }
 
-int validarFecha(struct Fecha f) {
-    time_t t = time(NULL);
-    struct tm *ahora = localtime(&t);
-    int dia = ahora->tm_mday;
-    int mes = ahora->tm_mon + 1;
-    int anio = ahora->tm_year + 1900;
+int esBisiesto(int anio)
+{
+	return (anio % 4 == 0 && anio % 100 != 0);
+}
 
-    if (f.anio > anio) return 0;
-    if (f.anio == anio && f.mes > mes) return 0;
-    if (f.anio == anio && f.mes == mes && f.dia > dia) return 0;
-    if (f.dia < 1 || f.dia > 31 || f.mes < 1 || f.mes > 12) return 0;
+int validarFecha(struct Fecha f)
+{
+    time_t t = time(NULL);
+    struct tm *actual = localtime(&t);
+    int anioActual = actual->tm_year + 1900;
+    int mesActual = actual->tm_mon + 1;
+    int diaActual = actual->tm_mday;
+
+    if (a > anioActual)
+    {
+        printf("Fecha inválida: el año no puede ser mayor al actual (%d).\n", anioActual);
+        return 0;
+    }
+
+    if (m < 1 || m > 12)
+    {
+        printf("Fecha inválida: el mes debe estar entre 1 y 12.\n");
+        return 0;
+    }
+
+    int diasMes[] = {31, (esBisiesto(a) ? 29 : 28), 31, 30, 31, 30,
+                     31, 31, 30, 31, 30, 31};
+
+    if (d < 1 || d > diasMes[m - 1])
+    {
+        printf("Fecha inválida: el día %d no es válido para el mes %d en el año %d.\n", d, m, a);
+        return 0;
+    }
+
+    if (a == anioActual && m == mesActual && d > diaActual)
+    {
+        printf("Fecha inválida: no puede ingresar una fecha futura.\n");
+        return 0;
+    }
+
+    if (a == anioActual && m > mesActual)
+    {
+        printf("Fecha inválida: no puede ingresar una fecha futura.\n");
+        return 0;
+    }
+
+    printf("Fecha válida: %02d/%02d/%04d\n", d, m, a);
     return 1;
 }
 
@@ -215,138 +243,180 @@ int validarMateria(char *clave) {
     return 0;
 }
 
+void agregarAlumno(struct Alumno *a)
+{
+	char continuar;
+    	int i;
 
-void capturarFecha(struct Fecha *f) {
-    do
-    {
-        printf("Fecha de nacimiento (DD MM AAAA): ");
-        scanf("%d %d %d", &f->dia, &f->mes, &f->anio);
-        if (!validarFecha(*f))
-            printf("Fecha invalida.\n");
-    } while (!validarFecha(*f));
-}
-
-void capturarDireccion(struct Direccion *d) {
-    printf("Calle: ");
-    getchar(); fgets(d->calle, 50, stdin); strtok(d->calle, "\n");
-    printf("Numero: ");
-    scanf("%d", &d->numero);
-    printf("Colonia: ");
-    getchar(); fgets(d->colonia, 50, stdin); strtok(d->colonia, "\n");
-    printf("Municipio: ");
-    fgets(d->municipio, 50, stdin); strtok(d->municipio, "\n");
-    printf("Estado: ");
-    fgets(d->estado, 50, stdin); strtok(d->estado, "\n");
-}
-
-
-void agregarAlumno(struct Alumno *a) {
-    int i;
 	do
-    {
-        printf("Ingresar matricula: ");
-        scanf("%d", &a->matricula);
-    } while (a->matricula <= 0);
-
-    do
-    {
-        printf("Ingrese su nombre: ");
-        getchar(); fgets(a->nombre, 100, stdin); strtok(a->nombre, "\n");
-    } while (!esTextoValido(a->nombre));
-
-    do
-    {
-        printf("Ingrese su carrera: ");
-        fgets(a->carrera, 50, stdin); strtok(a->carrera, "\n");
-    } while (!validarCarrera(a->carrera));
-
-    do
-    {
-        printf("Ingrese su semestre (1-10): ");
-        scanf("%d", &a->semestre);
-    } while (a->semestre < 1 || a->semestre > 10);
-
-    capturarFecha(&a->nacimiento);
-
-    do
-    {
-        printf("Ingresar su numero de telefono: ");
-        scanf("%s", a->telefono);
-    } while (!validarTelefono(a->telefono));
-
-    for (i = 0; i < a->semestre; i++)
-    {
-        do
-        {
-            printf("Promedio semestre %d: ", i + 1);
-            scanf("%f", &a->promedios[i]);
-        } while (a->promedios[i] < 0 || a->promedios[i] > 100);
-    }
-
-    do
-    {
-        printf("Ingresar su correo electronico: ");
-        scanf("%s", a->correo);
-    } while (!validarCorreo(a->correo));
-
-    capturarDireccion(&a->direccion);
-
-    printf("Alumno agregado correctamente.\n\n");
+	{
+	
+		do
+		{
+			printf("Ingresar matricula: ");
+			scanf("%d", &a->matricula);
+		
+			if(a->matricula <= 0)
+				printf("Marticula invalida.");
+		} while (a->matricula <= 0);
+		
+		do
+		{
+			printf("Ingrese su nombre: ");
+		        scanf(" %[^\n]", a->nombre);
+		
+			if(strlen(a->nombre) == 0)
+				printf("Nombre invalido.");
+		} while (strlen(a->nombre == 0));
+		
+		do
+		{
+		        printf("Ingrese su carrera: ");
+		        fgets(a->carrera, 50, stdin); strtok(a->carrera, "\n");
+		} while (!validarCarrera(a->carrera));
+		
+		do
+		{
+		        printf("Ingrese su semestre: ");
+		        scanf("%d", &a->semestre);
+		
+			if(a->semestre < 1 || a->semestre > 10)
+				printf("El semestre ingresado no existe.");
+		} while (a->semestre < 1 || a->semestre > 10);
+		
+		for (i = 0; i < a->semestre; i++)
+		{
+			do
+		        {
+		            	printf("Ingrese su promedio del semestre %d: ", i + 1);
+		            	scanf("%f", &a->promedio);
+		
+			    	if(a->promedio < 0 || a->promedio > 100)
+				    	printf("Promedio invalido.");
+		        } while (a->promedio < 0 || a->promedio > 100);
+		}
+		
+		do
+		{
+			printf("Ingrese su fecha de nacimiento: ");
+			scanf("%d %d %d", &p->nacimiento->dia, &p->nacimiento->mes, &p->nacimiento->anio);
+		} while (!fechaValida(p->nacimiento->dia, p->nacimiento->mes, p->nacimiento->anio));
+		
+		do
+		{
+		        printf("Ingresar su numero de telefono: ");
+		        scanf("%s", a->telefono);
+		} while (!validarTelefono(a->telefono));
+		
+		    
+		do
+		{
+		        printf("Ingresar su correo electronico: ");
+		        scanf("%s", a->correo);
+		} while (!validarCorreo(a->correo));
+		
+		printf("---\nIngresar dirección---\n");
+	        printf("Calle: ");
+	        scanf("%[^\n]", p->direccion->calle);
+	        printf("Numero: ");
+	        scanf("%d", &p->direccion->numero);
+	        printf("Colonia: ");
+	        scanf("%[^\n]", p->direccion->colonia);
+	        printf("Municipio: ");
+	        scanf("%[^\n]", p->direccion->municipio);
+	        printf("Estado: ");
+	        scanf(" %[^\n]", p->direccion->estado);
+		
+		printf("Alumno agregado correctamente. Desea agregar otro alumno? (s/n): \n");
+		scanf(" %c", &continuar);
+	} while (continuar == 's' || continuar == 'S');
 }
+	
 
-void agregarProfesor(struct Profesor *p) {
-    int i;
+void agregarProfesor(struct Profesor *p) 
+{
+	int i;
+	char continuar;
+
 	do
-    {
-        printf("Numero de empleado: ");
-        scanf("%d", &p->numEmpleado);
-    } while (p->numEmpleado <= 0);
+	{
+		do
+		{
+			printf("Numero de empleado: ");
+			scanf("%d", &p->numEmpleado);
 
-    do
-    {
-        printf("Ingresar su nombre: ");
-        getchar(); fgets(p->nombre, 100, stdin); strtok(p->nombre, "\n");
-    } while (!esTextoValido(p->nombre));
+			if(p->numEmpleado <= 0)
+			printf("El numero ingresado no existe.");
+		} while (p->numEmpleado <= 0);
+	
+		do
+		{
+			printf("Ingresar su nombre: ");
+			scanf(" %[^\n]", p->nombre);
 
-    do
-    {
-        printf("Ingresar su coordinacion (1-6): ");
-        scanf("%d", &p->coordinacion);
-    } while (p->coordinacion < 1 || p->coordinacion > 6);
+			if(strlen(p->nombre) == 0)
+				printf("Nombre invalido.");
+		} while (strlen(p->nombre) == 0);
+	
+		do
+		{
+			printf("Ingresar su coordinacion (1-6): ");
+			scanf("%d", &p->coordinacion);
 
-    capturarFecha(&p->nacimiento);
-
-    do
-    {
-        printf("Ingresar su numero de telefono: ");
-        scanf("%s", p->telefono);
-    } while (!validarTelefono(p->telefono));
-
-    do
-    {
-        printf("Ingresar su correo electronico: ");
-        scanf("%s", p->correo);
-    } while (!validarCorreo(p->correo));
-
-    capturarDireccion(&p->direccion);
-
-    do
-    {
-        printf("¿Cuantas materias imparte? (máximo 10): ");
-        scanf("%d", &p->totalMaterias);
-    } while (p->totalMaterias < 0 || p->totalMaterias > 10);
-
-    for (i = 0; i < p->totalMaterias; i++)
-    {
-        do
-        {
-            printf("Ingrese la clave materia %d: ", i + 1);
-            scanf("%s", p->clavesMaterias[i]);
-        } while (!validarMateria(p->clavesMaterias[i]));
-    }
-
-    printf("Profesor agregado correctamente.\n\n");
+			if(p->coordinacion < 1 || p->coordinacion > 6)
+				printf("La coordinacion ingresada no existe.");
+		} while (p->coordinacion < 1 || p->coordinacion > 6);
+	
+		do
+		{
+			printf("Ingrese su fecha de nacimiento: ");
+			scanf("%d %d %d", &p->nacimiento->dia, &p->nacimiento->mes, &p->nacimiento->anio);
+		} while (!fechaValida(p->nacimiento->dia, p->nacimiento->mes, p->nacimiento->anio));
+	
+		do
+		{
+			printf("Ingresar su numero de telefono: ");
+			scanf("%s", p->telefono);
+		} while (!validarTelefono(p->telefono));
+	
+	    	do
+	    	{
+	        	printf("Ingresar su correo electronico: ");
+	        	scanf("%s", p->correo);
+	    	} while (!validarCorreo(p->correo));
+	
+	    	printf("---\nIngresar dirección---\n");
+	        printf("Calle: ");
+	        scanf("%[^\n]", p->direccion->calle);
+	        printf("Numero: ");
+	        scanf("%d", &p->direccion->numero);
+	        printf("Colonia: ");
+	        scanf("%[^\n]", p->direccion->colonia);
+	        printf("Municipio: ");
+	        scanf("%[^\n]", p->direccion->municipio);
+	        printf("Estado: ");
+	        scanf(" %[^\n]", p->direccion->estado);
+		
+	    	do
+	    	{
+	        	printf("¿Cuantas materias imparte? (máximo 10): ");
+	        	scanf("%d", &p->totalMaterias);
+	    	} while (p->totalMaterias < 0 || p->totalMaterias > 10);
+	
+	    	for (i = 0; i < p->totalMaterias; i++)
+	    	{
+	        	do
+	        	{
+		            printf("Ingrese la clave materia %d: ", i + 1);
+		            scanf("%s", p->clavesMaterias[i]);
+		        } while (!validarMateria(p->clavesMaterias[i]));
+		}
+	
+	    	printf("Profesor agregado correctamente. Desea agregar otro profesor? (s/n): \n");
+		scanf(" %c", &continuar);
+	} while (continuar == 's' || continuar == 'S');
 }
+	
 
 void ingresarGrupos(struct Grupos *gp)
 {
