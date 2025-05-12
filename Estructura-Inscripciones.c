@@ -134,36 +134,22 @@ void guardarInscripcionesConDatos(struct Inscripcion* inscripciones, int totalIn
     printf("? Inscripciones validas guardadas en inscripciones.txt con nombres.\n");
 }
 
-int main() {
+main() 
+{
     struct Inscripcion inscripciones[50];
     struct Alumno alumnos[50];
     struct Grupos grupo[50];
-    int totalInscripciones = 0;
-    int totalGrupos = 2;
-    int totalAlumnos = 3;
-    int i;	
+    int totalInscripciones = 0, totalGrupos = 2, totalAlumnos = 3, i, cantidad;	
 
-    // Datos simulados para prueba
-    alumnos[0].matricula = 101; strcpy(alumnos[0].nombre, "Juan Perez");
-    alumnos[1].matricula = 102; strcpy(alumnos[1].nombre, "Ana Gomez");
-    alumnos[2].matricula = 103; strcpy(alumnos[2].nombre, "Luis Torres");
-
-    grupo[0].claveGrupo = 1; strcpy(grupo[0].claveMateria.nombre, "Matematicas");
-    grupo[1].claveGrupo = 2; strcpy(grupo[1].claveMateria.nombre, "Historia");
-
-    int cantidad;
     printf("\n¿Cuantas inscripciones desea registrar? ");
     scanf("%d", &cantidad);
 
-    for (int i = 0; i < cantidad && totalInscripciones < 50; i++) {
+    for (i = 0; i < cantidad && totalInscripciones < 50; i++) {
         printf("\n--- Registro %d ---\n", i + 1);
         registrarInscripcion(&inscripciones[totalInscripciones], totalInscripciones + 1, grupo, totalGrupos, alumnos, totalAlumnos);
         totalInscripciones++;
     }
-
     guardarInscripcionesConDatos(inscripciones, totalInscripciones, alumnos, totalAlumnos, grupo, totalGrupos);
-
-    return 0;
 }
 
 
