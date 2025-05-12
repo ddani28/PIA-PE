@@ -61,7 +61,7 @@ main()
                 
             case 5:
                //Funcion Inscripciones
-               printf("\n¿Cuantas inscripciones desea registrar? ");
+               printf("\nÂ¿Cuantas inscripciones desea registrar? ");
     			scanf("%d", &cantidad);
 
     			for (int i = 0; i < cantidad && totalInscripciones < 50; i++) {
