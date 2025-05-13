@@ -152,6 +152,8 @@ void textoNormal() {
 }
 
 void ingresarMaterias(struct Materias *mt, FILE *f) {
+    char continuar;
+
     if (!f) {
         textoRojo();
         printf("No se pudo acceder al archivo de materias\n");
@@ -159,33 +161,41 @@ void ingresarMaterias(struct Materias *mt, FILE *f) {
         return;
     }
 
-    do {
-        printf("\nIngresa la clave de la materia: ");
-        scanf("%d", &mt->clave);
-        if (mt->clave <= 0) {
-            textoRojo(); printf("Ingrese una clave mayor a 0\n"); textoNormal();
-        }
-    } while (mt->clave <= 0);
+    do
+    {
+	do
+	{
+        	printf("\nIngresa la clave de la materia: ");
+        	scanf("%d", &mt->clave);
+        	if (mt->clave <= 0) {
+            	textoRojo(); printf("Ingrese una clave mayor a 0\n"); textoNormal();
+        	}
+    	} while (mt->clave <= 0);
 
-    do {
-        printf("Ingresa el semestre de la materia: ");
-        scanf("%d", &mt->semestre);
-        if (mt->semestre <= 0 || mt->semestre > 10) {
-            textoRojo(); printf("Ingrese un semestre entre 1 y 10\n"); textoNormal();
-        }
-    } while (mt->semestre <= 0 || mt->semestre > 10);
+    	do
+	{
+        	printf("Ingresa el semestre de la materia: ");
+        	scanf("%d", &mt->semestre);
+        	if (mt->semestre <= 0 || mt->semestre > 10) {
+            	textoRojo(); printf("Ingrese un semestre entre 1 y 10\n"); textoNormal();
+        	}
+    	} while (mt->semestre <= 0 || mt->semestre > 10);
 
-    do {
-        printf("Ingresa el nombre de la materia: ");
-        scanf(" %19[^\n]", mt->nombre);
-        if (strlen(mt->nombre) == 0) {
-            textoRojo(); printf("El nombre no puede estar vacÌo.\n"); textoNormal();
-        }
-    } while (strlen(mt->nombre) == 0);
+    	do
+    	{
+        	printf("Ingresa el nombre de la materia: ");
+        	scanf(" %19[^\n]", mt->nombre);
+        	if (strlen(mt->nombre) == 0) {
+            	textoRojo(); printf("El nombre no puede estar vac√≠o.\n"); textoNormal();
+        	}
+    	} while (strlen(mt->nombre) == 0);
 
-    fprintf(f, "%d,%d,%s\n", mt->clave, mt->semestre, mt->nombre);
-    printf("Materia guardada correctamente.\n");
-}
+    	fprintf(f, "%d,%d,%s\n", mt->clave, mt->semestre, mt->nombre);
+    	printf("Materia guardada correctamente. Desea agregar otra materia? (s/n): \n");
+	scanf(" %c", &continuar;
+    } while ( continuar == 's' || continuar == 'S' );
+	
+    
 
 void mostrarMaterias(FILE *f) {
     if (!f) {
@@ -248,12 +258,12 @@ void ingresarGrupos(struct Grupos *gp, FILE *f) {
     scanf("%d", &gp->claveMateria);
 
     do {
-        printf("\nIngresa el n˙mero de empleado: ");
+        printf("\nIngresa el n√∫mero de empleado: ");
         scanf(" %9[^\n]", gp->numEmpleado);
         if (strlen(gp->numEmpleado) == 0) {
-            printf("\033[1;31mEl n˙mero de empleado no puede estar vacÌo.\033[0m\n");
+            printf("\033[1;31mEl n√∫mero de empleado no puede estar vac√≠o.\033[0m\n");
         } else if (numEmpleadoYaExiste(gp->numEmpleado)) {
-            printf("\033[1;31mEl n˙mero de empleado '%s' ya est· registrado. Ingrese otro.\033[0m\n", gp->numEmpleado);
+            printf("\033[1;31mEl n√∫mero de empleado '%s' ya est√° registrado. Ingrese otro.\033[0m\n", gp->numEmpleado);
             gp->numEmpleado[0] = '\0';
         }
     } while (strlen(gp->numEmpleado) == 0);
@@ -278,7 +288,7 @@ void ingresarGrupos(struct Grupos *gp, FILE *f) {
             (gp->fh.anio == fechaActual.tm_year + 1900 && gp->fh.mes == fechaActual.tm_mon + 1 && gp->fh.dia > fechaActual.tm_mday)) {
             printf("\033[1;31mLa fecha ingresada es mayor que la fecha actual.\033[0m\n");
         } else if (!esFechaValida(gp->fh.dia, gp->fh.mes, gp->fh.anio)) {
-            printf("\033[1;31mFecha inv·lida. Verifique el dÌa y el mes (especialmente en aÒos bisiestos).\033[0m\n");
+            printf("\033[1;31mFecha inv√°lida. Verifique el d√≠a y el mes (especialmente en a√±os bisiestos).\033[0m\n");
         } else {
             break;
         }
@@ -317,3 +327,62 @@ void mostrarGrupos() {
     fclose(f);
 }
 
+void actualizarPromedio()
+{
+    FILE *f = fopen("alumnos.txt", "r+");
+    if (!f)
+	{
+        textoRojo();
+        printf("No se pudo abrir el archivo de alumnos.\n");
+        textoNormal();
+        return;
+    }
+
+    char nombreBuscado[100];
+    float nuevoPromedio;
+    int encontrado = 0;
+    struct Alumno al;
+    long posicion;
+
+    printf("\nIngrese el nombre completo del alumno: ");
+    scanf(" %99[^\n]", nombreBuscado);
+
+    do
+	{
+        printf("Ingrese el nuevo promedio (0 - 10): ");
+        scanf("%f", &nuevoPromedio);
+        if (nuevoPromedio < 0 || nuevoPromedio > 10)
+		{
+            textoRojo();
+            printf("Promedio inv√°lido. Debe estar entre 0 y 10.\n");
+            textoNormal();
+        }
+    } while (nuevoPromedio < 0 || nuevoPromedio > 10);
+
+    while (fscanf(f, "%d,%d,%f,%99[^,],%*[^,\n]\n", &al.matricula, &al.semestre, &al.promedios[0], al.nombre) == 4)
+	{
+        if (strcmp(al.nombre, nombreBuscado) == 0)
+		{
+            encontrado = 1;
+            al.promedios[0] = nuevoPromedio;
+
+            posicion = ftell(f) - strlen(al.nombre) - 20;
+            fseek(f, posicion, SEEK_SET);
+
+            fprintf(f, "%d,%d,%.2f,%s\n", al.matricula, al.semestre, al.promedios[0], al.nombre);
+
+            printf("\033[1;32mPromedio actualizado exitosamente.\033[0m\n");
+            printf("Grupo: %d | Alumno: %s | Promedio actual: %.2f\n", al.semestre, al.nombre, al.promedios[0]);
+            break;
+        }
+    }
+
+    if (!encontrado)
+	{
+        textoRojo();
+        printf("Alumno no encontrado.\n");
+        textoNormal();
+    }
+
+    fclose(f);
+}
