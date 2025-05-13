@@ -127,7 +127,7 @@ main()
                 break;
 
             case 7:
-                // menuReportes();
+                Reportes();
                 break;
 
             case 8:
@@ -336,53 +336,112 @@ void actualizarPromedio()
         printf("No se pudo abrir el archivo de alumnos.\n");
         textoNormal();
         return;
-    }
+    	}
 
-    char nombreBuscado[100];
+    char nombreBuscado[100], continuar;
     float nuevoPromedio;
     int encontrado = 0;
     struct Alumno al;
     long posicion;
 
-    printf("\nIngrese el nombre completo del alumno: ");
-    scanf(" %99[^\n]", nombreBuscado);
-
     do
-	{
-        printf("Ingrese el nuevo promedio (0 - 10): ");
-        scanf("%f", &nuevoPromedio);
-        if (nuevoPromedio < 0 || nuevoPromedio > 10)
+    {
+	    printf("\nIngrese el nombre completo del alumno: ");
+	    scanf(" %99[^\n]", nombreBuscado);
+	
+	    do
 		{
-            textoRojo();
-            printf("Promedio inválido. Debe estar entre 0 y 10.\n");
-            textoNormal();
-        }
-    } while (nuevoPromedio < 0 || nuevoPromedio > 10);
-
-    while (fscanf(f, "%d,%d,%f,%99[^,],%*[^,\n]\n", &al.matricula, &al.semestre, &al.promedios[0], al.nombre) == 4)
-	{
-        if (strcmp(al.nombre, nombreBuscado) == 0)
+	        printf("Ingrese el nuevo promedio (0 - 10): ");
+	        scanf("%f", &nuevoPromedio);
+	        if (nuevoPromedio < 0 || nuevoPromedio > 10)
 		{
-            encontrado = 1;
-            al.promedios[0] = nuevoPromedio;
+	            textoRojo();
+	            printf("Promedio inválido. Debe estar entre 0 y 10.\n");
+	            textoNormal();
+	        }
+	    } while (nuevoPromedio < 0 || nuevoPromedio > 10);
+	
+	    while (fscanf(f, "%d,%d,%f,%99[^,],%*[^,\n]\n", &al.matricula, &al.semestre, &al.promedios[0], al.nombre) == 4)
+	    {
+	        if (strcmp(al.nombre, nombreBuscado) == 0)
+		{
+	            encontrado = 1;
+	            al.promedios[0] = nuevoPromedio;
+	
+	            posicion = ftell(f) - strlen(al.nombre) - 20;
+	            fseek(f, posicion, SEEK_SET);
+	
+	            fprintf(f, "%d,%d,%.2f,%s\n", al.matricula, al.semestre, al.promedios[0], al.nombre);
+	
+	            printf("\033[1;32mPromedio actualizado exitosamente.\033[0m\n");
+	            printf("Grupo: %d | Alumno: %s | Promedio actual: %.2f\n", al.semestre, al.nombre, al.promedios[0]);
+	            break;
+	        }
+	    }
+	
+	    if (!encontrado)
+	    {
+	        textoRojo();
+	        printf("Alumno no encontrado.\n");
+	        textoNormal();
+	    }
 
-            posicion = ftell(f) - strlen(al.nombre) - 20;
-            fseek(f, posicion, SEEK_SET);
-
-            fprintf(f, "%d,%d,%.2f,%s\n", al.matricula, al.semestre, al.promedios[0], al.nombre);
-
-            printf("\033[1;32mPromedio actualizado exitosamente.\033[0m\n");
-            printf("Grupo: %d | Alumno: %s | Promedio actual: %.2f\n", al.semestre, al.nombre, al.promedios[0]);
-            break;
-        }
-    }
-
-    if (!encontrado)
-	{
-        textoRojo();
-        printf("Alumno no encontrado.\n");
-        textoNormal();
-    }
-
+	    printf("Profesor guardado correctamente. Desea agregar a otro profesor? (s/n): \n");
+            scanf(" %c", &continuar);
+    } while (continuar == 's' || continuar == 'S');
+	    
     fclose(f);
 }
+
+void Reportes()
+{
+    char opcion;
+    do
+    {
+        printf("\n--- REPORTES ---\n");
+        printf("a) Listado de alumnos por carrera\n");
+        printf("b) Lista de clases\n");
+        printf("c) Listado de grupos por fecha\n");
+        printf("d) Minuta\n");
+        printf("e) Generar archivo de alumnos\n");
+        printf("f) Generar archivo de profesores\n");
+        printf("g) Mostrar archivo de texto\n");
+        printf("h) Salir\n");
+        printf("Opción: ");
+        scanf(" %c", &opcion);
+
+        if (opcion < 'a' || opcion > 'h')
+            textoRojo(); printf("Opción no válida. Debe ser entre 'a' y 'h'.\n"); textoNormal();
+            
+        switch (opcion)
+		{
+            case 'a':
+                listarAlumnosPorCarrera();
+                break;
+            case 'b':
+                listarClasesPorProfesor();
+                break;
+            case 'c':
+                listarGruposPorFecha();
+                break;
+            case 'd':
+                mostrarMinuta();
+                break;
+            case 'e':
+                generarArchivoAlumnos();
+                break;
+            case 'f':
+                generarArchivoProfesores();
+                break;
+            case 'g':
+                mostrarArchivoTexto();
+                break;
+            case 'h':
+                printf("Regresando al menú principal...\n");
+                break;
+        }
+
+    } while (opcion != 'h');
+}
+
+
