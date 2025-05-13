@@ -2,8 +2,6 @@
 #include <string.h>
 #include <time.h>
 
-// ========== FUNCIONES DE FECHA ==========
-
 int esBisiesto(int anio) {
     return (anio % 4 == 0 && (anio % 100 != 0 || anio % 400 == 0));
 }
@@ -15,8 +13,6 @@ int esFechaValida(int dia, int mes, int anio) {
     return 1;
 }
 
-// ========== ESTRUCTURAS ==========
-
 struct Fecha {
     int dia, mes, anio;
 };
@@ -27,8 +23,6 @@ struct Grupos {
     char periodoGrupo[20], fecha[11];
     struct Fecha fh;
 };
-
-// ========== FUNCIONES AUXILIARES ==========
 
 int numEmpleadoYaExiste(const char *numBuscado) {
     FILE *f = fopen("grupos.txt", "r");
@@ -46,8 +40,6 @@ int numEmpleadoYaExiste(const char *numBuscado) {
     fclose(f);
     return 0;
 }
-
-// ========== FUNCIONES PRINCIPALES ==========
 
 void ingresarGrupos(struct Grupos *gp, FILE *f) {
     do {
