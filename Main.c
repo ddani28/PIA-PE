@@ -55,6 +55,7 @@ struct Profesor
 
 //void ingresarMaterias(struct Materias *mt);
 
+void actualizarPromedio();
 void Reportes();
 void listarAlumnosPorCarrera();
 void listarClasesPorProfesor();
