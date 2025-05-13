@@ -55,6 +55,15 @@ struct Profesor
 
 //void ingresarMaterias(struct Materias *mt);
 
+void Reportes();
+void listarAlumnosPorCarrera();
+void listarClasesPorProfesor();
+
+void mostrarMinuta();
+void generarArchivoAlumnos();
+void generarArchivoProfesores();
+void mostrarArchivoTexto();
+
 main()
 {
     int opcion;
