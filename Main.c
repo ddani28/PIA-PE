@@ -440,8 +440,274 @@ void Reportes()
                 printf("Regresando al menú principal...\n");
                 break;
         }
-
     } while (opcion != 'h');
 }
 
 
+void listarAlumnosPorCarrera()
+{
+	FILE *f = fopen("alumnos.dat", "r");
+    if (!f)
+    {
+        textoRojo();
+        printf("No se pudo abrir el archivo de alumnos.\n");
+        textoNormal();
+    }
+
+    struct Alumno a;
+    char carreraBuscada[50];
+    int encontrados = 0;
+
+    printf("Ingrese la carrera a buscar: ");
+    scanf(" %[^\n]", carreraBuscada);
+
+    printf("\n%-10s %-20s %-10s %-10s %-15s %-30s\n", "Matricula", "Nombre", "Semestre", "Promedio", "Telefono", "Correo");
+    printf("-----------------------------------------------------------------------------------------------\n");
+
+    while (fread(&a, sizeof(struct Alumno), 1, f) == 1)
+    {
+        if (strcmp(a.carrera, carreraBuscada) == 0)
+        {
+            printf("%-10d %-20s %-10d %-10.2f %-15d %-30s\n", a.matricula, a.nombre, a.semestre, a.promedio, a.telefono, a.correo);
+            encontrados++;
+        }
+    }
+
+    if (encontrados == 0)
+    {
+        textoRojo();
+        printf("No se encontraron alumnos para la carrera: %s\n", carreraBuscada);
+        textoNormal();
+    }
+
+    fclose(f);
+}
+
+void listarClasesPorProfesor()
+{
+    int claveProfesor;
+    int encontrado = 0;
+
+    printf("Ingrese la clave (número de empleado) del profesor: ");
+    scanf("%d", &claveProfesor);
+
+    FILE *fp = fopen("profesores.dat", "rb");
+    if (!fp)
+	{
+        textoRojo();
+        printf("No se pudo abrir el archivo de profesores.\n");
+        textoNormal();
+    }
+
+    struct Profesor prof;
+    while (fread(&prof, sizeof(struct Profesor), 1, fp) == 1)
+	{
+        if (prof.numEmpleado == claveProfesor)
+            encontrado = 1;
+    }
+    fclose(fp);
+
+    if (!encontrado)
+	{
+        textoRojo();
+        printf("No se encontró un profesor con la clave %d.\n", claveProfesor);
+        textoNormal();
+    }
+
+    FILE *fg = fopen("grupos.txt", "r");
+    if (!fg)
+	{
+        textoRojo();
+        printf("No se pudo abrir el archivo de grupos.\n");
+        textoNormal();
+    }
+
+    struct Grupos grupo;
+    encontrado = 0;
+
+    printf("\n%-10s %-10s %-20s %-10s\n", "Grupo", "Semestre", "Materia", "Periodo");
+    printf("-------------------------------------------------------------\n");
+
+    while (fscanf(fg, "%d %d %d %19s %d %d %s %d %d %d\n", &grupo.claveGrupo, &grupo.semestre, &grupo.numEmpleado, grupo.periodoGrupo, &grupo.claveMateria.clave, &grupo.claveMateria.semestre, grupo.claveMateria.nombre, &grupo.fh.dia, &grupo.fh.mes, &grupo.fh.anio) == 10)
+    {
+        if (grupo.numEmpleado == claveProfesor)
+		{
+            printf("%-10d %-10d %-20s %-10s\n", grupo.claveGrupo, grupo.semestre, grupo.claveMateria.nombre, grupo.periodoGrupo);
+            encontrado = 1;
+        }
+    }
+
+    if (!encontrado)
+	{
+        textoRojo();
+        printf("Este profesor no tiene clases asignadas.\n");
+        textoNormal();
+    }
+    fclose(fg);
+}
+
+void mostrarMinuta()
+{
+    int claveGrupo, claveMateria;
+    struct Inscripcion ins;
+    struct Alumno alum;
+    struct Grupos grupo;
+    int encontrado = 0;
+
+    printf("Ingrese la clave del grupo: ");
+    scanf("%d", &claveGrupo);
+
+    printf("Ingrese la clave de la materia: ");
+    scanf("%d", &claveMateria);
+
+    FILE *fIns = fopen("inscripciones.dat", "r");
+    if (!fIns)
+        textoRojo(); printf("No se pudo abrir el archivo de inscripciones.\n"); textoNormal();
+
+    FILE *fAlum = fopen("alumnos.dat", "r");
+    if (!fAlum)
+	{
+        textoRojo(); printf("No se pudo abrir el archivo de alumnos.\n"); textoNormal();
+        fclose(fIns);
+    }
+
+    printf("\n--- MINUTA DEL GRUPO %d, MATERIA %d ---\n", claveGrupo, claveMateria);
+    printf("%-10s %-30s %-10s\n", "Matricula", "Nombre", "Promedio");
+    printf("----------------------------------------------------------\n");
+
+    while (fread(&ins, sizeof(struct Inscripcion), 1, fIns) == 1)
+	{
+        if (ins.grupoIns.claveGrupo == claveGrupo && ins.grupoIns.claveMateria.clave == claveMateria)
+		{
+            rewind(fAlum);
+            while (fread(&alum, sizeof(struct Alumno), 1, fAlum) == 1)
+			{
+                if (alum.matricula == ins.matricula)
+				{
+                    printf("%-10d %-30s %-10.2f\n", alum.matricula, alum.nombre, alum.promedio);
+                    encontrado = 1;
+                }
+            }
+        }
+    }
+
+    if (!encontrado)
+	{
+        textoRojo();
+        printf("No se encontraron alumnos inscritos en ese grupo y materia.\n");
+        textoNormal();
+    }
+    fclose(fIns);
+    fclose(fAlum);
+}
+
+void generarArchivoAlumnos()
+{
+    FILE *fBin = fopen("alumnos.dat", "r");
+    FILE *fTxt = fopen("alumnos.txt", "w");
+
+    if (!fBin || !fTxt)
+	{
+        textoRojo();
+        printf("Error al abrir archivos para lectura/escritura.\n");
+        textoNormal();
+        if (fBin) fclose(fBin);
+        if (fTxt) fclose(fTxt);
+    }
+
+    struct Alumno a;
+
+    fprintf(fTxt, "========== LISTADO DE ALUMNOS ==========\n\n");
+
+    while (fread(&a, sizeof(struct Alumno), 1, fBin) == 1)
+	{
+        fprintf(fTxt, "Matricula: %d\n", a.matricula);
+        fprintf(fTxt, "Nombre: %s\n", a.nombre);
+        fprintf(fTxt, "Carrera: %s\n", a.carrera);
+        fprintf(fTxt, "Semestre: %d\n", a.semestre);
+        fprintf(fTxt, "Promedio: %.2f\n", a.promedio);
+        fprintf(fTxt, "Telefono: %d\n", a.telefono);
+        fprintf(fTxt, "Correo: %s\n", a.correo);
+        fprintf(fTxt, "Fecha de Nacimiento: %02d/%02d/%04d\n", a.nacimiento.dia, a.nacimiento.mes, a.nacimiento.anio);
+        fprintf(fTxt, "Direccion: %s %d, Col. %s, %s, %s\n", a.direccion.calle, a.direccion.numero, a.direccion.colonia, a.direccion.municipio, a.direccion.estado);
+        fprintf(fTxt, "----------------------------------------\n\n");
+    }
+
+    fclose(fBin);
+    fclose(fTxt);
+
+    printf("\033[1;32mArchivo de alumnos generado exitosamente como 'alumnos.txt'.\033[0m\n");
+}
+
+void generarArchivoProfesores()
+{
+    FILE *fBin = fopen("profesores.dat", "r");
+    FILE *fTxt = fopen("profesores.txt", "w");
+
+    if (!fBin || !fTxt)
+	{
+        textoRojo();
+        printf("Error al abrir archivos para lectura/escritura.\n");
+        textoNormal();
+        if (fBin) fclose(fBin);
+        if (fTxt) fclose(fTxt);
+    }
+
+    struct Profesor p;
+
+    fprintf(fTxt, "========== LISTADO DE PROFESORES ==========\n\n");
+
+    while (fread(&p, sizeof(struct Profesor), 1, fBin) == 1)
+	{
+        fprintf(fTxt, "Num. Empleado: %d\n", p.numEmpleado);
+        fprintf(fTxt, "Nombre: %s\n", p.nombre);
+        fprintf(fTxt, "Coordinación: %d\n", p.coordinacion);
+        fprintf(fTxt, "Telefono: %s\n", p.telefono);
+        fprintf(fTxt, "Correo: %s\n", p.correo);
+        fprintf(fTxt, "Fecha de Nacimiento: %02d/%02d/%04d\n", p.fechaNacimiento.dia, p.fechaNacimiento.mes, p.fechaNacimiento.anio);
+        fprintf(fTxt, "Direccion: %s %d, Col. %s, %s, %s\n", p.direccion.calle, p.direccion.numero, p.direccion.colonia, p.direccion.municipio, p.direccion.estado);
+        fprintf(fTxt, "-------------------------------------------\n\n");
+    }
+
+    fclose(fBin);
+    fclose(fTxt);
+
+    printf("\033[1;32mArchivo de profesores generado exitosamente como 'profesores.txt'.\033[0m\n");
+}
+
+void mostrarArchivoTexto()
+{
+    char opcion;
+    char linea[256];
+    FILE *f;
+
+    printf("¿Qué archivo desea ver?\n");
+    printf("a) Alumnos\n");
+    printf("b) Profesores\n");
+    printf("Seleccione una opción (a/b): ");
+    scanf(" %c", &opcion);
+
+    if (opcion == 'a')
+	{
+        f = fopen("alumnos.txt", "r");
+        if (!f)
+            textoRojo(); printf("No se pudo abrir el archivo de alumnos.\n"); textoNormal();
+        printf("\n--- CONTENIDO DE ALUMNOS.TXT ---\n\n");
+    }
+    else if (opcion == 'b')
+	{
+        f = fopen("profesores.txt", "r");
+        if (!f)
+	{
+            textoRojo(); printf("No se pudo abrir el archivo de profesores.\n"); textoNormal();
+        printf("\n--- CONTENIDO DE PROFESORES.TXT ---\n\n");
+	}
+    }
+    else
+        textoRojo(); printf("Opción no válida.\n"); textoNormal();
+
+    while (fgets(linea, sizeof(linea), f))
+        printf("%s", linea);
+
+    fclose(f);
+}
