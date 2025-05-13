@@ -83,7 +83,7 @@ main()
             case 2:
                 // profesores(&prof, archivo_profesores);
                 break;
-
+        
             case 3: {
                 FILE *f = fopen("materias.txt", "a");
                 if (!f) {
