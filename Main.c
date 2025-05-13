@@ -123,7 +123,7 @@ main()
                 break;
 
             case 6:
-                // actualizarPromedio();
+                actualizarPromedio();
                 break;
 
             case 7:
